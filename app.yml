@@ -77,3 +77,11 @@ outputs:
       index.html (one file: figures embedded, no scripts, no external resources), summary.json
       (the page's numbers, observations and caveats), citations.csv, provenance.json.
     mediaTypes: [text/html, text/csv, application/json]
+
+# How a release is tested before it is made public: the inputs a review run uses.
+# See app-deploy-service docs/app-manifest-review.md.
+review:
+  version: 1
+  generate:
+    command: python -m tests.make_fixture "$REVIEW_INPUT_DIR"
+    root: linked
