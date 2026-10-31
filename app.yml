@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://schemas.pennsieve.io/app-manifest/v1.json
+schemaVersion: "1.0"
+application:
+  name: Bulk RNA-seq Report
+  description: >-
+    The last step of the bulk RNA-seq workflows. Reads bulk-de's differential expression outputs
+    (one or more comparisons) and, when linked, rnaseq-quant's sample QC (reads, trimming,
+    mapping rate), and writes one self-contained HTML page a biologist can read offline:
+    the design, sample QC with flagged libraries, the PCA, and per contrast the volcano and MA
+    plots, the top genes and the enriched gene sets; then methods with every step's version and
+    parameters, the citations gathered from every step's provenance, and the data credits. The
+    text states observations backed by numbers, with the caveats each method comes with.
+  type: processor
+  tags:
+    - bulk-rna-seq
+    - transcriptomics
+    - genomics
+    - report
+    - quality-control
+    - differential-expression
+    - gene-set-enrichment
+    - neuroscience
+    - pain
+    - musculoskeletal
+runtime:
+  cpu: 1024
+  # Light step: reads summary tables and the per-gene tables of each contrast only. Measured on
+  # the Discover 427 outputs: see README "Runtime". 2048 MB is the smallest Fargate size for 1 vCPU.
+  memory: 2048
+  computeTypes:
+    - standard
+    - lambda
+  timeoutSeconds: 300
+parameters:
+  - name: REPORT_TITLE
+    type: string
+    description: Title of the report page.
+    defaultValue: "Bulk RNA-seq Report"
+  - name: FDR
+    type: number
+    description: >-
+      False discovery rate for what the report counts and lists as significant (genes, gene
+      sets), applied to the adjusted p-values bulk-de wrote. Display only.
+    defaultValue: 0.05
+    min: 0
+    max: 1
+  - name: MAX_GENES
+    type: integer
+    description: Genes per up/down table of each contrast; gene sets per direction are half of it.
+    defaultValue: 15
+    min: 1
+    max: 200
+  - name: DATA_CREDIT
+    type: string
+    description: >-
+      Credit line for the input data (authors, title, repository, DOI, licence), shown under
+      Data. Discover 427 is recognised from its library names without it.
+    defaultValue: ""
+inputs:
+  - name: de
+    description: >-
+      bulk-de outputs, one <LABEL>/ folder each (design.json, summary.json, samples.csv, pca.csv,
+      pca.png, <contrast>.csv, figures, <contrast>_gsea.csv, de.json, provenance.json).
+    mediaTypes: [text/csv, image/png, application/json]
+    placement: subfolder
+    required: true
+  - name: counts
+    description: >-
+      rnaseq-quant's counts output, for read-level QC (samples.csv with reads_in,
+      reads_after_trim, mapping_rate; qc/<sample>.fastp.json; provenance.json). Optional.
+    mediaTypes: [text/csv, application/json]
+    placement: subfolder
+    required: false
+outputs:
+  - name: report
+    description: >-
+      index.html (one file: figures embedded, no scripts, no external resources), summary.json
+      (the page's numbers, observations and caveats), citations.csv, provenance.json.
+    mediaTypes: [text/html, text/csv, application/json]

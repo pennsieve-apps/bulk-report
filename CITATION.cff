@@ -1,0 +1,91 @@
+cff-version: 1.2.0
+message: If you use this app, please cite it and the works it builds on, listed under references.
+type: software
+title: bulk-report
+abstract: 'Offline HTML report of the bulk RNA-seq workflows: design, sample QC, PCA, per contrast volcano and MA plots, top
+  genes and enriched gene sets, methods, citations gathered from every step''s provenance, and data credits.'
+authors:
+- name: Pennsieve (University of Pennsylvania)
+repository-code: https://github.com/pennsieve-apps/bulk-report
+license: Apache-2.0
+version: 0.1.0
+keywords:
+- bulk-rna-seq
+- transcriptomics
+- report
+- differential-expression
+references:
+- type: article
+  title: 'Matplotlib: A 2D Graphics Environment'
+  authors:
+  - family-names: Hunter
+    given-names: John D.
+  year: 2007
+  journal: Computing in Science & Engineering
+  volume: 9
+  issue: '3'
+  start: '90'
+  end: '95'
+  doi: 10.1109/MCSE.2007.55
+- type: data
+  title: Sex-dependent differences in the genomic profile of lingual sensory neurons in naive and tongue-tumor bearing mice
+  authors:
+  - family-names: Tumanov
+    given-names: Alexei V
+    orcid: https://orcid.org/0000-0001-6042-0152
+  - family-names: Shein
+    given-names: Sergey A
+    orcid: https://orcid.org/0000-0003-0258-425X
+  - family-names: Lai
+    given-names: Zhao
+  - family-names: Chen
+    given-names: Yidong
+    orcid: https://orcid.org/0000-0001-6806-2185
+  - family-names: Ruparel
+    given-names: Shivani B
+    orcid: https://orcid.org/0000-0002-8232-3780
+  year: 2025
+  publisher:
+    name: SPARC Portal
+  doi: 10.26275/gaap-zlpj
+  license: CC-BY-4.0
+  url: https://sparc.science/datasets/427
+  notes: 'Demo data. Described in: Ibrahim T, Wu P, Wang LJ, et al. Sex-dependent differences in the genomic profile of lingual
+    sensory neurons in naïve and tongue-tumor bearing mice. Sci Rep 2023;13:13117. doi:10.1038/s41598-023-40380-6'
+- type: article
+  title: Sex-dependent differences in the genomic profile of lingual sensory neurons in naïve and tongue-tumor bearing mice
+  authors:
+  - family-names: Ibrahim
+    given-names: Tarek
+  - family-names: Wu
+    given-names: Ping
+  - family-names: Wang
+    given-names: Li-Ju
+  - family-names: Fang-Mei
+    given-names: Chang
+  - family-names: Murillo
+    given-names: Josue
+  - family-names: Merlo
+    given-names: Jaclyn
+  - family-names: Shein
+    given-names: Sergey S.
+  - family-names: Tumanov
+    given-names: Alexei V.
+  - family-names: Lai
+    given-names: Zhao
+  - family-names: Weldon
+    given-names: Korri
+  - family-names: Chen
+    given-names: Yidong
+  - family-names: Ruparel
+    given-names: Shivani
+  year: 2023
+  journal: Scientific Reports
+  volume: 13
+  issue: '1'
+  start: '13117'
+  doi: 10.1038/s41598-023-40380-6
+  identifiers:
+  - type: other
+    value: PMID:37573456
+    description: PubMed ID
