@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'">
 <title>{{ title }}</title>
 <style>
   :root { color-scheme: light; }
@@ -115,13 +116,13 @@ Reference levels: {% for k, v in r.reference_levels.items() %}{{ k }} = {{ v }}{
 <h2 id="de-{{ loop.index }}">Differential expression{% if runs | length > 1 %}: {{ r.label }}{% endif %}</h2>
 {{ observations(r.observations) }}
 {{ caveats(r.caveats) }}
-{{ figure(r.pca_png | img, "PCA of the variance-stabilised counts of the 500 most variable genes (blind to the design).") }}
+{{ figure(r.pca_png, "PCA of the variance-stabilised counts of the 500 most variable genes (blind to the design).") }}
 {% for c in r.contrasts %}
 <h3>{{ c.column }}: {{ c.level }} vs {{ c.reference }}</h3>
 <p>{{ c.observation }}</p>
 <div class="grid">
-{{ figure(c.volcano | img, "Volcano: log2 fold change vs -log10 p; coloured at FDR " ~ fdr ~ ", top genes named.") }}
-{{ figure(c.ma | img, "MA: " ~ ("shrunk " if c.lfc_shrunk else "") ~ "log2 fold change vs mean normalised count.") }}
+{{ figure(c.volcano, "Volcano: log2 fold change vs -log10 p; coloured at FDR " ~ fdr ~ ", top genes named.") }}
+{{ figure(c.ma, "MA: " ~ ("shrunk " if c.lfc_shrunk else "") ~ "log2 fold change vs mean normalised count.") }}
 </div>
 {% for side, rows in (("Up in " ~ c.level, c.up), ("Down in " ~ c.level, c.down)) %}
 {% if rows %}
@@ -139,7 +140,7 @@ Reference levels: {% for k, v in r.reference_levels.items() %}{{ k }} = {{ v }}{
 <details{% if g.n_significant %} open{% endif %}><summary>{{ g.collection }}: {{ g.n_up }} up, {{ g.n_down }} down of {{ g.n_sets }} sets at FDR {{ fdr }}</summary>
 <div class="wrap"><table>
 <tr><th>gene set</th><th class="num">size</th><th class="num">NES</th><th class="num">FDR</th><th>leading edge</th></tr>
-{% for x in g.up + g.down %}<tr><td>{{ x.term }}</td><td class="num">{{ x.size }}</td><td class="num {{ 'up' if x.nes > 0 else 'down' }}">{{ x.nes | num(2) }}</td><td class="num">{{ x.fdr | pval }}</td><td class="small">{{ (x.leading_edge or "").split(";")[:8] | join(", ") }}</td></tr>{% endfor %}
+{% for x in g.up + g.down %}<tr><td>{{ x.term }}</td><td class="num">{{ x.size }}</td><td class="num {{ 'up' if x.nes > 0 else 'down' }}">{{ x.nes | num(2) }}</td><td class="num">{{ x.fdr | gsea_p }}</td><td class="small">{{ (x.leading_edge or "").split(";")[:8] | join(", ") }}</td></tr>{% endfor %}
 </table></div></details>
 {% endfor %}
 {% endif %}
@@ -156,12 +157,12 @@ Reference levels: {% for k, v in r.reference_levels.items() %}{{ k }} = {{ v }}{
 
 <h2 id="citations">Citations</h2>
 <ol class="refs small">
-{% for r in methods.references %}<li>{{ r.text }}{% if r.doi %} <a href="https://doi.org/{{ r.doi }}">doi:{{ r.doi }}</a>{% endif %}{% if r.pmid %} PMID {{ r.pmid }}{% endif %}</li>{% endfor %}
+{% for r in methods.references %}<li>{{ r.text }}{% if r.doi %} <a href="https://doi.org/{{ r.doi }}">doi:{{ r.doi }}</a>{% endif %}{% if r.pmid %} PMID {{ r.pmid }}{% endif %}{% if not r.verified %} <span class="muted">(as given by the step; not checked by this report)</span>{% endif %}</li>{% endfor %}
 </ol>
 
 <h2 id="data">Data</h2>
 {% if credit %}
-<ul class="small">{% for d in credit %}<li>{{ d.text }}{% if d.doi %} <a href="https://doi.org/{{ d.doi }}">doi:{{ d.doi }}</a>{% endif %}{% if d.licence %} ({{ d.licence }}){% endif %}{% if d.paper %}. Described in: {{ d.paper }}{% endif %}</li>{% endfor %}</ul>
+<ul class="small">{% for d in credit %}<li>{{ d.text }}{% if d.doi %} <a href="https://doi.org/{{ d.doi }}">doi:{{ d.doi }}</a>{% endif %}{% if d.licence %} ({{ d.licence }}){% endif %}{% if d.url %}, <a href="{{ d.url }}">{{ d.url }}</a>{% endif %}{% if d.paper %}. Described in: {{ d.paper }}{% endif %}</li>{% endfor %}</ul>
 {% else %}
 <p class="small muted">No dataset credit given (set DATA_CREDIT to name the dataset, its authors, DOI and licence).</p>
 {% endif %}

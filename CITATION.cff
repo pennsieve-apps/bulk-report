@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: If you use this app, please cite it and the works it builds on, listed under references.
 type: software
-title: bulk-report
+title: Jinja2
 abstract: 'Offline HTML report of the bulk RNA-seq workflows: design, sample QC, PCA, per contrast volcano and MA plots, top
   genes and enriched gene sets, methods, citations gathered from every step''s provenance, and data credits.'
 authors:
 - name: Pennsieve (University of Pennsylvania)
-repository-code: https://github.com/pennsieve-apps/bulk-report
+repository-code: https://github.com/pennsieve-apps/Jinja2
 license: Apache-2.0
 version: 0.1.0
 keywords:
@@ -50,6 +50,7 @@ references:
   doi: 10.26275/gaap-zlpj
   license: CC-BY-4.0
   url: https://sparc.science/datasets/427
+  version: '1'
   notes: 'Demo data. Described in: Ibrahim T, Wu P, Wang LJ, et al. Sex-dependent differences in the genomic profile of lingual
     sensory neurons in naïve and tongue-tumor bearing mice. Sci Rep 2023;13:13117. doi:10.1038/s41598-023-40380-6'
 - type: article
@@ -89,3 +90,16 @@ references:
   - type: other
     value: PMID:37573456
     description: PubMed ID
+- type: software
+  title: Matplotlib
+  authors:
+  - name: The Matplotlib development team
+  version: 3.11.2
+  repository-code: https://github.com/matplotlib/matplotlib
+- type: software
+  title: Jinja2
+  authors:
+  - name: Pallets
+  version: 3.1.6
+  license: BSD-3-Clause
+  repository-code: https://github.com/pallets/jinja

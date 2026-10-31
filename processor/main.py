@@ -37,7 +37,6 @@ for noisy in ("matplotlib", "PIL", "fontTools"):
 APP_NAME = "bulk-report"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = Path(__file__).parent / "templates"
-MAX_PNG = 10 << 20
 
 DEFAULTS = {"REPORT_TITLE": "Bulk RNA-seq Report", "FDR": "0.05", "MAX_GENES": "15", "DATA_CREDIT": ""}
 PARAMETERS = tuple(DEFAULTS)
@@ -78,14 +77,10 @@ def tool_versions() -> dict:
     return out
 
 
-def data_uri(path) -> str | None:
-    if path is None or not Path(path).is_file() or Path(path).stat().st_size > MAX_PNG:
-        return None
-    with open(path, "rb") as fh:
-        head = fh.read(8)
-        if head != b"\x89PNG\r\n\x1a\n":          # only PNG reaches the page
-            return None
-        return "data:image/png;base64," + base64.b64encode(head + fh.read()).decode()
+def qc_figure(F, qc) -> str:
+    """The report's own QC figure as a data URI (drawn into a temporary folder of its own)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        return "data:image/png;base64," + base64.b64encode(F.qc_bars(qc, Path(tmp) / "qc.png").read_bytes()).decode()
 
 
 def own_citations() -> list[dict]:
@@ -138,40 +133,39 @@ def main() -> int:
         return 1
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    errors = []
-    qc = S.sample_qc(inp)
-    qc_png = None
-    if qc:
+    errors: list[dict] = []
+
+    def section(name: str, fn, default=None):
+        """Each section on its own: an unexpected upstream file costs that section, not the page."""
         try:
-            with tempfile.TemporaryDirectory() as tmp:
-                qc_png = data_uri(F.qc_bars(qc, Path(tmp) / "qc.png"))
-        except Exception as exc:  # the figure is a convenience; the table stands without it
-            log.exception("QC figure failed: %s", exc)
-    runs = []
-    for r in inp.de_runs:
-        try:
-            runs.append(S.de_run(r, params["FDR"], params["MAX_GENES"]))
-        except Exception as exc:  # one unreadable run does not sink the page
-            log.exception("%s: %s", r.label, exc)
-            errors.append({"section": f"differential expression {r.label}", "error": f"{type(exc).__name__}: {exc}"})
+            return fn()
+        except Exception as exc:
+            log.exception("%s: %s", name, exc)
+            errors.append({"section": name, "error": f"{type(exc).__name__}: {exc}"})
+            return default
+
+    qc = section("sample QC", lambda: S.sample_qc(inp))
+    qc_png = section("sample QC figure", lambda: qc_figure(F, qc)) if qc else None
+    runs = [x for x in (section(f"differential expression {r.label}",
+                                lambda r=r: S.de_run(r, params["FDR"], params["MAX_GENES"])) for r in inp.de_runs) if x]
     own = {"app": APP_NAME, "version": app_version(), "tools": tool_versions(),
            "parameters": {k: v for k, v in params.items() if k != "DATA_CREDIT"}, "citations": own_citations()}
-    meth = S.methods(inp, own)
-    credit = S.credits(inp, params["DATA_CREDIT"])
+    meth = section("methods and citations", lambda: S.methods(inp, own), {"steps": [], "references": []})
+    credit = section("data credits", lambda: S.credits(inp, params["DATA_CREDIT"]), [])
     generated = started.strftime("%Y-%m-%d %H:%M UTC")
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES)), autoescape=select_autoescape(["html", "j2"]),
                       trim_blocks=True, lstrip_blocks=True)
-    env.filters.update(num=S.num, pval=S.pval, pct=S.pct, img=data_uri)
+    env.filters.update(num=S.num, pval=S.pval, pct=S.pct, gsea_p=S.gsea_p)
     html = env.get_template("index.html.j2").render(title=params["REPORT_TITLE"], generated_at=generated, qc=qc,
                                                     qc_png=qc_png, runs=runs, methods=meth, credit=credit,
                                                     fdr=params["FDR"], errors=errors)
     (output_dir / "index.html").write_text(html, encoding="utf-8")
     with open(output_dir / "citations.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh, lineterminator="\n")
-        w.writerow(["number", "citation", "doi", "pmid"])
+        w.writerow(["number", "citation", "doi", "pmid", "verified"])
         for i, r in enumerate(meth["references"], 1):
-            w.writerow([i, r["text"], r["doi"], r["pmid"]])
+            w.writerow([i, r["text"], r["doi"], r["pmid"], "yes" if r.get("verified") else "no"])
     summary = {
         "app": APP_NAME, "version": own["version"], "generated": generated, "title": params["REPORT_TITLE"],
         "fdr": params["FDR"],
@@ -195,7 +189,7 @@ def main() -> int:
             "started": started.isoformat(), "finished": datetime.now(timezone.utc).isoformat(),
             "samples": [{"sample_id": r["sample_id"], "flags": r["flags"]} for r in (qc or {}).get("rows", [])],
             "peak_rss_mb": peak_rss_mb(), "timings_seconds": {"total": round(time.monotonic() - t0, 2)},
-            "outputs": ["index.html", "summary.json", "citations.csv", "provenance.json"]}
+            "outputs": ["index.html", "summary.json", "citations.csv", "provenance.json"], "errors": errors}
     (output_dir / "provenance.json").write_text(json.dumps(prov, indent=2, default=str) + "\n")
     log.info("done: %d run(s), %d contrast(s), %d citations, %.1fs -> %s", len(runs),
              sum(len(r["contrasts"]) for r in runs), len(meth["references"]), time.monotonic() - t0,

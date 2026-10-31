@@ -34,7 +34,7 @@ DOIS = {
     "matplotlib": "10.1109/MCSE.2007.55",
     "salmon": "10.1038/nmeth.4197",
     "fastp": "10.1093/bioinformatics/bty560",
-    "tximport": "10.12688/f1000research.7563.1",
+    "tximport": "10.12688/f1000research.7563.2",
     "gencode": "10.1093/nar/gkac1071",
 }
 JOURNAL_SHORT = {"Bioinformatics": "Bioinformatics", "Genome Biology": "Genome Biol",

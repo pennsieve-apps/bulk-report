@@ -12,7 +12,7 @@ from typing import Any
 
 import pandas as pd
 
-from processor.inputs import DeRun, Inputs, read_csv
+from processor.inputs import DeRun, Inputs
 
 LOW_MAPPING = 0.5           # salmon mapping rate below which a library is flagged
 LOW_READS = 5_000_000       # reads after trimming below which a library is flagged
@@ -32,6 +32,13 @@ def pval(v) -> str:
         return "–"
     v = float(v)
     return "< 1e-300" if v == 0 else (f"{v:.2g}" if v < 0.001 else f"{v:.3f}")
+
+
+def gsea_p(v, permutations: int = 1000) -> str:
+    """GSEA p/FDR from permutations: 0 means smaller than 1/(permutations + 1)."""
+    if v is None or (isinstance(v, float) and math.isnan(v)):
+        return "–"
+    return f"< 1/{permutations + 1}" if float(v) == 0 else pval(v)
 
 
 def pct(v, d: int = 1) -> str:
@@ -120,7 +127,7 @@ def de_run(run: DeRun, fdr: float, max_genes: int) -> dict[str, Any]:
                            "levels": d.get("levels", {}), "reference_levels": d.get("reference_levels", {}),
                            "samples": d.get("samples", []), "left_out": d.get("samples_left_out", []),
                            "genes": d.get("genes", {}), "organism": s.get("organism"), "layout": s.get("layout"),
-                           "notes": s.get("notes", []), "pca_png": run.file("pca.png"), "contrasts": []}
+                           "notes": s.get("notes", []), "pca_png": run.files.png(run.file("pca.png")), "contrasts": []}
     obs, caveats = [], []
     n = len(out["samples"])
     per_level = {t: pd.Series([x[t] for x in out["samples"]]).value_counts().to_dict() for t in terms}
@@ -155,9 +162,10 @@ def de_run(run: DeRun, fdr: float, max_genes: int) -> dict[str, Any]:
                    "for technical reasons: include the batch in the design when it is known.")
 
     for c in s.get("contrasts", []):
-        res = read_csv(run.file(f"{c['name']}.csv"), "gene_id", "padj", keep_default_na=False,
+        res = run.files.csv(run.file(f"{c['name']}.csv"), "gene_id", "padj", keep_default_na=False,
                        na_values=[""], dtype={"gene_id": str, "gene_name": str})
-        e = {**c, "volcano": run.file(f"{c['name']}_volcano.png"), "ma": run.file(f"{c['name']}_ma.png"),
+        e = {**c, "volcano": run.files.png(run.file(f"{c['name']}_volcano.png")),
+             "ma": run.files.png(run.file(f"{c['name']}_ma.png")),
              "up": [], "down": [], "gsea": []}
         if res is not None:
             res["gene_name"] = res["gene_name"].fillna("")
@@ -173,7 +181,7 @@ def de_run(run: DeRun, fdr: float, max_genes: int) -> dict[str, Any]:
                          "lfc": r[lfc], "padj": r["padj"]} for _, r in df.iterrows()]
             e["up"] = rows(sig[sig["log2_fold_change"] > 0].nsmallest(max_genes, "padj"))
             e["down"] = rows(sig[sig["log2_fold_change"] < 0].nsmallest(max_genes, "padj"))
-        gs = read_csv(run.file(f"{c['name']}_gsea.csv"), "collection", "term", "nes", "fdr")
+        gs = run.files.csv(run.file(f"{c['name']}_gsea.csv"), "collection", "term", "nes", "fdr")
         if gs is not None:
             for coll, sub in gs.groupby("collection", sort=False):
                 sig_sets = sub[sub["fdr"] < fdr]
@@ -238,8 +246,10 @@ def methods(inp: Inputs, own: dict[str, Any]) -> dict[str, Any]:
         k = doi or str(c.get("text"))
         if k not in index:
             r = known.get(doi)
-            text = str(c.get("text") or (_ref_text(r) if r else f"doi:{doi}"))
-            refs.append({"doi": doi, "pmid": c.get("pmid") or (r or {}).get("pmid") or "", "text": text})
+            # The verified record wins over a step's own text; anything else is shown as given, marked.
+            text = _ref_text(r) if r else str(c.get("text") or f"doi:{doi}")
+            refs.append({"doi": doi, "pmid": (r or {}).get("pmid") or str(c.get("pmid") or ""), "text": text,
+                         "verified": r is not None})
             index[k] = len(refs)
         return index[k]
 
@@ -257,8 +267,9 @@ def methods(inp: Inputs, own: dict[str, Any]) -> dict[str, Any]:
 
 
 DATASETS = [
-    # Discover 427: libraries FN1-3, FT1-3, N1-3, T1, T2, MT (in pool-<id> folders)
-    {"match": {"fn1", "fn2", "fn3", "ft1", "ft2", "ft3", "n1", "n2", "n3", "t1", "t2", "mt"}, "ref": "tg_data",
+    # Discover 427: its pool-<id> folder names, as bulk-de records them (generic names like N1, T1 do not count)
+    {"match": {"pool-FN1", "pool-FN2", "pool-FN3", "pool-FT1", "pool-FT2", "pool-FT3", "pool-N1", "pool-N2",
+               "pool-N3", "pool-T1", "pool-T2", "pool-MT"}, "ref": "tg_data",
      "paper": "tg_paper", "licence": "CC BY 4.0", "url": "https://sparc.science/datasets/427"},
 ]
 
@@ -267,13 +278,10 @@ def credits(inp: Inputs, data_credit: str) -> list[dict[str, Any]]:
     out = []
     if data_credit:
         out.append({"text": data_credit, "doi": "", "licence": "", "paper": None})
-    ids = [str(x) for r in inp.de_runs for x in r.de.get("samples") or []]
-    if inp.quant is not None:
-        ids += list(inp.quant.samples["sample_id"].astype(str))
-    samples = {re.sub(r"^(pool|sam)-", "", x, flags=re.I).lower() for x in ids}
+    samples = {str(x) for r in inp.de_runs for x in r.de.get("samples") or []}
     refs = _references()
     for d in DATASETS:
-        if len(d["match"] & samples) >= len(d["match"]) // 2:
+        if len(samples) >= 6 and samples <= d["match"]:
             r = refs[d["ref"]]
             authors = ", ".join(f"{a['family']} {''.join(x[0] for x in a['given'].split())}" for a in r["authors"])
             out.append({"text": f"{authors}. {r['title']}. {r['journal']} ({r['year']}).", "doi": r["doi"],

@@ -1304,7 +1304,7 @@
   "checked": "2026-10-31"
  },
  "tximport": {
-  "doi": "10.12688/f1000research.7563.1",
+  "doi": "10.12688/f1000research.7563.2",
   "source": "crossref",
   "title": "Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences",
   "authors": [
@@ -1323,13 +1323,13 @@
   ],
   "journal": "F1000Research",
   "journal_short": "F1000Res",
-  "year": 2015,
+  "year": 2016,
   "volume": "4",
   "issue": "",
   "pages": "1521",
   "type": "article",
   "short_authors": "Soneson C, Love MI, Robinson MD",
-  "pmid": "",
+  "pmid": "26925227",
   "checked": "2026-10-31"
  },
  "gencode": {
