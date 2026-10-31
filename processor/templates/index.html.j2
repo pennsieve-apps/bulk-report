@@ -156,6 +156,7 @@ Reference levels: {% for k, v in r.reference_levels.items() %}{{ k }} = {{ v }}{
 </table></div>
 
 <h2 id="citations">Citations</h2>
+<p class="card small">{{ platform.statement }}</p>
 <ol class="refs small">
 {% for r in methods.references %}<li>{{ r.text }}{% if r.doi %} <a href="https://doi.org/{{ r.doi }}">doi:{{ r.doi }}</a>{% endif %}{% if r.pmid %} PMID {{ r.pmid }}{% endif %}{% if not r.verified %} <span class="muted">(as given by the step; not checked by this report)</span>{% endif %}</li>{% endfor %}
 </ol>

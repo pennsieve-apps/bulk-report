@@ -36,12 +36,14 @@ DOIS = {
     "fastp": "10.1093/bioinformatics/bty560",
     "tximport": "10.12688/f1000research.7563.2",
     "gencode": "10.1093/nar/gkac1071",
+    "fastp_1": "10.1002/imt2.70078",
+    "pennsieve": "10.1038/s41597-025-06075-5",
 }
 JOURNAL_SHORT = {"Bioinformatics": "Bioinformatics", "Genome Biology": "Genome Biol",
                  "Proceedings of the National Academy of Sciences": "Proc Natl Acad Sci U S A",
                  "Cell Systems": "Cell Syst", "Nature Methods": "Nat Methods", "Nature Genetics": "Nat Genet",
                  "GENETICS": "Genetics", "Genetics": "Genetics", "F1000Research": "F1000Res",
-                 "Scientific Reports": "Sci Rep", "Computing in Science & Engineering": "Comput Sci Eng",
+                 "Scientific Reports": "Sci Rep", "Scientific Data": "Sci Data", "iMeta": "iMeta", "Computing in Science & Engineering": "Comput Sci Eng",
                  "Nucleic Acids Research": "Nucleic Acids Res",
                  "Journal of the Royal Statistical Society Series B: Statistical Methodology": "J R Stat Soc Series B"}
 

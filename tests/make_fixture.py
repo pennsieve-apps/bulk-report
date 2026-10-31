@@ -108,7 +108,7 @@ def quant(out: Path, rng) -> None:
     pd.DataFrame(rows).to_csv(out / "samples.csv", index=False)
     (out / "provenance.json").write_text(json.dumps({"app": "rnaseq-quant", "version": "0.1.0",
                                                      "tools": {"salmon": "1.10.3"}, "parameters": {},
-                                                     "citations": ["10.1038/nmeth.4197", "doi:10.1093/bioinformatics/bty560",
+                                                     "citations": ["10.1038/nmeth.4197", "doi:10.1093/bioinformatics/bty560", "10.1002/imt2.70078",
                                                                    "10.1186/s13059-014-0550-8", "10.9999/unknown"]}))
 
 

@@ -1,13 +1,13 @@
 """The report's own figure: per-library QC bars (PNG, 150 dpi)."""
 from __future__ import annotations
 
-from pathlib import Path
+from typing import BinaryIO
 
 DPI = 150
 BAR, FLAG, TEXT, TEXT2, GRID = "#2a78d6", "#e34948", "#0b0b0b", "#52514e", "#e4e3df"
 
 
-def qc_bars(qc: dict, path: Path) -> Path:
+def qc_bars(qc: dict, out: BinaryIO) -> BinaryIO:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -32,6 +32,6 @@ def qc_bars(qc: dict, path: Path) -> Path:
         ax.grid(axis="y", color=GRID, linewidth=0.6)
         ax.set_axisbelow(True)
     fig.tight_layout()
-    fig.savefig(path, dpi=DPI)
+    fig.savefig(out, dpi=DPI, format="png")
     plt.close(fig)
-    return path
+    return out

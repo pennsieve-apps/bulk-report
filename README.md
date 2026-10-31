@@ -15,7 +15,16 @@ with flags; or, without rnaseq-quant, counts and genes detected per library); pe
 **PCA** with a sentence on which design term PC1/PC2 follow, and per contrast the **volcano and
 MA plots**, the **top genes** up and down, and the **enriched gene sets** per collection; then
 **methods** (every step's app, version, parameters and tools, from its `provenance.json`),
-**citations** gathered from every step's provenance and numbered, and **data credits**. Each
+**citations**, and **data credits**. The citation section opens with a fixed platform statement,
+printed first in every report, above the methods' citations:
+
+> Citing Pennsieve. If you used Pennsieve to store, analyse, share or publish data reported in a
+> publication, please cite: Goldblum Z, et al. Pennsieve: A Collaborative Platform for
+> Translational Neuroscience and Beyond. Scientific Data 2025;12:1834.
+> doi:10.1038/s41597-025-06075-5. Please also cite the datasets you used (their DOIs) and the
+> methods listed below.
+
+followed by the citations gathered from every step's provenance, numbered. Each
 section states observations backed by numbers and the caveats that go with them (few replicates,
 pooled libraries, additive designs, GSEA on overlapping sets).
 
@@ -61,7 +70,8 @@ parameters.
   comparison the formula, samples, observations, caveats and per contrast n up/down, top genes,
   gene-set counts; the steps with their citation numbers; the numbered citations
   (`doi`, `pmid`, `text`); data credits; section errors.
-- `citations.csv`: `number, citation, doi, pmid`.
+- `citations.csv`: `number, kind, citation, doi, pmid, verified`; the first row is the Pennsieve
+  paper (`kind` = `platform`, no number), then the numbered methods (`kind` = `method`).
 - `provenance.json`: app, version, tools, parameters, inputs, started, finished, samples (QC
   flags), peak RSS, citations.
 
@@ -154,6 +164,16 @@ dataset against DataCite and the Discover API; `scripts/verify_citations.py` rew
 
 - Hunter JD. Matplotlib: A 2D Graphics Environment. *Comput Sci Eng* 9(3):90-95 (2007).
   doi:10.1109/MCSE.2007.55. (Crossref; not in PubMed)
+- Goldblum Z, Xu Z, Shi H, Orzechowski P, Spence J, Davis KA, Litt B, Sinha N, Wagenaar J.
+  Pennsieve: A Collaborative Platform for Translational Neuroscience and Beyond. *Sci Data*
+  12(1):1834 (2025). doi:10.1038/s41597-025-06075-5. PMID 41261152. (The platform statement;
+  printed by the report, deliberately not in this app's `CITATION.cff`, since the app also runs
+  outside Pennsieve. Crossref: 9 authors, issued 2025-11-19; PubMed indexed it as 41261152 by
+  2026-10-31.)
+
+`references.json` also holds fastp 1.0 (Chen S. fastp 1.0: An ultra-fast all-round tool for FASTQ
+data quality control and preprocessing. *iMeta* 4(5):e70078 (2025). doi:10.1002/imt2.70078. PMID
+41112039), which rnaseq-quant cites.
 
 Demo data: Tumanov AV, Shein SA, Lai Z, Chen Y, Ruparel SB. Sex-dependent differences in the
 genomic profile of lingual sensory neurons in naive and tongue-tumor bearing mice. SPARC Portal

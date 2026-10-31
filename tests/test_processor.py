@@ -61,11 +61,26 @@ def test_report(fx, tmp_path, monkeypatch, layout):
     gsea = next(x for x in cites if x["doi"] == "10.1073/pnas.0506580102")
     assert gsea["text"].startswith("Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment analysis: A")
     assert "not checked by this report" in html
+    statement = ("Citing Pennsieve. If you used Pennsieve to store, analyse, share or publish data reported in a "
+                 "publication, please cite: Goldblum Z, et al. Pennsieve: A Collaborative Platform for Translational "
+                 "Neuroscience and Beyond. Scientific Data 2025;12:1834. doi:10.1038/s41597-025-06075-5. Please also "
+                 "cite the datasets you used (their DOIs) and the methods listed below.")
+    cit = html[html.index('id="citations"'):]
+    assert statement in cit and cit.index(statement) < cit.index("<ol")
+    assert summary["platform_citation"]["statement"] == statement
+    assert summary["platform_citation"]["doi"] == "10.1038/s41597-025-06075-5"
     assert {s["app"] for s in summary["steps"]} == {"bulk-de", "rnaseq-quant", "bulk-report"}
     # data credit for Discover 427 recognised from the library names
     assert summary["data"] and summary["data"][0]["doi"] == "10.26275/gaap-zlpj"
     assert "Tumanov AV" in summary["data"][0]["text"] and "Ruparel SB" in summary["data"][0]["text"]
-    assert (tmp_path / "citations.csv").read_text().count("\n") == len(cites) + 1
+    import pandas as pd
+
+    table = pd.read_csv(tmp_path / "citations.csv", dtype=str, keep_default_na=False)
+    assert len(table) == len(cites) + 1 and table.at[0, "kind"] == "platform"
+    assert table.at[0, "citation"].startswith("Goldblum Z, Xu Z, Shi H, et al. Pennsieve")
+    assert (table["kind"].iloc[1:] == "method").all()
+    fastp1 = next(x for x in cites if x["doi"] == "10.1002/imt2.70078")
+    assert fastp1["verified"] and fastp1["text"].startswith("Chen S. fastp 1.0") and fastp1["pmid"] == "41112039"
     prov = json.loads((tmp_path / "provenance.json").read_text())
     for k in ("app", "version", "tools", "parameters", "inputs", "started", "finished", "samples", "peak_rss_mb"):
         assert k in prov

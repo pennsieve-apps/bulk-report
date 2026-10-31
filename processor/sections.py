@@ -217,6 +217,19 @@ def de_run(run: DeRun, fdr: float, max_genes: int) -> dict[str, Any]:
 
 # ---- methods, citations, credits ---------------------------------------------------------------
 
+# Printed first in every report's citation section, above the methods (the paper is "pennsieve" in references.json).
+PLATFORM_STATEMENT = (
+    "Citing Pennsieve. If you used Pennsieve to store, analyse, share or publish data reported in a publication, "
+    "please cite: Goldblum Z, et al. Pennsieve: A Collaborative Platform for Translational Neuroscience and Beyond. "
+    "Scientific Data 2025;12:1834. doi:10.1038/s41597-025-06075-5. Please also cite the datasets you used (their "
+    "DOIs) and the methods listed below.")
+
+
+def platform_citation() -> dict[str, Any]:
+    r = _references()["pennsieve"]
+    return {"statement": PLATFORM_STATEMENT, "doi": r["doi"], "pmid": r.get("pmid") or "", "text": _ref_text(r)}
+
+
 def _references() -> dict[str, dict[str, Any]]:
     return json.loads(REFERENCES.read_text(encoding="utf-8"))
 

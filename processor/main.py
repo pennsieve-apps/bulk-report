@@ -17,12 +17,12 @@ from __future__ import annotations
 
 import base64
 import csv
+import io
 import json
 import logging
 import os
 import platform
 import sys
-import tempfile
 import time
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version
@@ -78,9 +78,10 @@ def tool_versions() -> dict:
 
 
 def qc_figure(F, qc) -> str:
-    """The report's own QC figure as a data URI (drawn into a temporary folder of its own)."""
-    with tempfile.TemporaryDirectory() as tmp:
-        return "data:image/png;base64," + base64.b64encode(F.qc_bars(qc, Path(tmp) / "qc.png").read_bytes()).decode()
+    """The report's own QC figure as a data URI, drawn in memory (no temporary files: /tmp may be read-only)."""
+    buf = io.BytesIO()
+    F.qc_bars(qc, buf)
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
 def own_citations() -> list[dict]:
@@ -152,20 +153,22 @@ def main() -> int:
            "parameters": {k: v for k, v in params.items() if k != "DATA_CREDIT"}, "citations": own_citations()}
     meth = section("methods and citations", lambda: S.methods(inp, own), {"steps": [], "references": []})
     credit = section("data credits", lambda: S.credits(inp, params["DATA_CREDIT"]), [])
+    platform = S.platform_citation()
     generated = started.strftime("%Y-%m-%d %H:%M UTC")
 
     env = Environment(loader=FileSystemLoader(str(TEMPLATES)), autoescape=select_autoescape(["html", "j2"]),
                       trim_blocks=True, lstrip_blocks=True)
     env.filters.update(num=S.num, pval=S.pval, pct=S.pct, gsea_p=S.gsea_p)
     html = env.get_template("index.html.j2").render(title=params["REPORT_TITLE"], generated_at=generated, qc=qc,
-                                                    qc_png=qc_png, runs=runs, methods=meth, credit=credit,
+                                                    qc_png=qc_png, runs=runs, methods=meth, credit=credit, platform=platform,
                                                     fdr=params["FDR"], errors=errors)
     (output_dir / "index.html").write_text(html, encoding="utf-8")
     with open(output_dir / "citations.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh, lineterminator="\n")
-        w.writerow(["number", "citation", "doi", "pmid", "verified"])
+        w.writerow(["number", "kind", "citation", "doi", "pmid", "verified"])
+        w.writerow(["", "platform", platform["text"], platform["doi"], platform["pmid"], "yes"])
         for i, r in enumerate(meth["references"], 1):
-            w.writerow([i, r["text"], r["doi"], r["pmid"], "yes" if r.get("verified") else "no"])
+            w.writerow([i, "method", r["text"], r["doi"], r["pmid"], "yes" if r.get("verified") else "no"])
     summary = {
         "app": APP_NAME, "version": own["version"], "generated": generated, "title": params["REPORT_TITLE"],
         "fdr": params["FDR"],
@@ -179,6 +182,7 @@ def main() -> int:
                              "gsea": [{k: g[k] for k in ("collection", "n_sets", "n_up", "n_down")} for g in c["gsea"]]}
                           for c in r["contrasts"]]} for r in runs],
         "steps": [{k: s[k] for k in ("app", "version", "where", "citations")} for s in meth["steps"]],
+        "platform_citation": platform,
         "citations": [{"number": i, **r} for i, r in enumerate(meth["references"], 1)],
         "data": credit, "errors": errors,
     }

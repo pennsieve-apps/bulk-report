@@ -1596,5 +1596,79 @@
   "short_authors": "Frankish A, Carbonell-Sala S, Diekhans M, et al",
   "pmid": "36420896",
   "checked": "2026-10-31"
+ },
+ "fastp_1": {
+  "doi": "10.1002/imt2.70078",
+  "source": "crossref",
+  "title": "fastp 1.0: An ultra‐fast all‐round tool for FASTQ data quality control and preprocessing",
+  "authors": [
+   {
+    "family": "Chen",
+    "given": "Shifu"
+   }
+  ],
+  "journal": "iMeta",
+  "journal_short": "iMeta",
+  "year": 2025,
+  "volume": "4",
+  "issue": "5",
+  "pages": "e70078",
+  "type": "article",
+  "short_authors": "Chen S",
+  "pmid": "41112039",
+  "checked": "2026-10-31"
+ },
+ "pennsieve": {
+  "doi": "10.1038/s41597-025-06075-5",
+  "source": "crossref",
+  "title": "Pennsieve: A Collaborative Platform for Translational Neuroscience and Beyond",
+  "authors": [
+   {
+    "family": "Goldblum",
+    "given": "Zack"
+   },
+   {
+    "family": "Xu",
+    "given": "Zhongchuan"
+   },
+   {
+    "family": "Shi",
+    "given": "Haoer"
+   },
+   {
+    "family": "Orzechowski",
+    "given": "Patryk"
+   },
+   {
+    "family": "Spence",
+    "given": "Jamaal"
+   },
+   {
+    "family": "Davis",
+    "given": "Kathryn A."
+   },
+   {
+    "family": "Litt",
+    "given": "Brian"
+   },
+   {
+    "family": "Sinha",
+    "given": "Nishant"
+   },
+   {
+    "family": "Wagenaar",
+    "given": "Joost"
+   }
+  ],
+  "journal": "Scientific Data",
+  "journal_short": "Sci Data",
+  "year": 2025,
+  "volume": "12",
+  "issue": "1",
+  "pages": "1834",
+  "type": "article",
+  "short_authors": "Goldblum Z, Xu Z, Shi H, et al",
+  "pmid": "41261152",
+  "checked": "2026-10-31"
  }
 }
