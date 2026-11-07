@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: If you use this app, please cite it and the works it builds on, listed under references.
 type: software
-title: Jinja2
+title: Bulk RNA-seq Report
 abstract: 'Offline HTML report of the bulk RNA-seq workflows: design, sample QC, PCA, per contrast volcano and MA plots, top
   genes and enriched gene sets, methods, citations gathered from every step''s provenance, and data credits.'
 authors:
@@ -11,9 +11,9 @@ contact:
   family-names: Wagenaar
   orcid: https://orcid.org/0009-0004-5925-5451
   affiliation: University of Pennsylvania
-repository-code: https://github.com/pennsieve-apps/Jinja2
+repository-code: https://github.com/pennsieve-apps/bulk-report
 license: Apache-2.0
-version: 0.1.1
+version: 0.1.2
 keywords:
 - bulk-rna-seq
 - transcriptomics
