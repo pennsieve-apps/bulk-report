@@ -19,9 +19,6 @@ application:
     - quality-control
     - differential-expression
     - gene-set-enrichment
-    - neuroscience
-    - pain
-    - musculoskeletal
 runtime:
   cpu: 1024
   # Light step: reads summary tables and the per-gene tables of each contrast only. Measured on
